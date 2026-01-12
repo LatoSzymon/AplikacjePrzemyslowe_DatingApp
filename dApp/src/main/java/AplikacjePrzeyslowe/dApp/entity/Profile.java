@@ -93,35 +93,40 @@ public class Profile {
     // ========== BUSINESS METHODS ==========
 
     /**
-     * Dodaje zdjęcie do profilu z synchronizacją relacji dwukierunkowej
+     * Dodaje zdjęcie do profilu
      */
     public void addPhoto(Photo photo) {
-        photos.add(photo);
-        photo.setProfile(this);
+        if (photo != null) {
+            photo.setProfile(this);
+            photos.add(photo);
+        }
     }
 
     /**
-     * Usuwa zdjęcie z profilu z synchronizacją relacji dwukierunkowej
+     * Usuwa zdjęcie z profilu
      */
     public void removePhoto(Photo photo) {
-        photos.remove(photo);
-        photo.setProfile(null);
+        if (photo != null) {
+            photos.remove(photo);
+        }
     }
 
     /**
      * Dodaje zainteresowanie do profilu
      */
     public void addInterest(Interest interest) {
-        interests.add(interest);
-        interest.getProfiles().add(this);
+        if (interest != null) {
+            interests.add(interest);
+        }
     }
 
     /**
      * Usuwa zainteresowanie z profilu
      */
     public void removeInterest(Interest interest) {
-        interests.remove(interest);
-        interest.getProfiles().remove(this);
+        if (interest != null) {
+            interests.remove(interest);
+        }
     }
 
     /**
@@ -129,7 +134,7 @@ public class Profile {
      */
     public Photo getMainPhoto() {
         return photos.stream()
-                .filter(Photo::getIsPrimary)
+                .filter(p -> Boolean.TRUE.equals(p.getIsPrimary()))
                 .findFirst()
                 .orElse(photos.stream().findFirst().orElse(null));
     }

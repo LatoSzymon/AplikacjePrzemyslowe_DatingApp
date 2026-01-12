@@ -2,16 +2,17 @@ spring:
   application:
     name: DatingApp
   
-  # Database Configuration
+  # Database Configuration - MySQL dla production
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: ""
-  
+    url: jdbc:mysql://localhost:3306/dating_app_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
         format_sql: true
@@ -24,13 +25,14 @@ spring:
     show-sql: false
     open-in-view: false
   
-  # SQL initialization
+  # SQL initialization - wczytywanie schematu i danych
   sql:
     init:
-      mode: never
+      mode: always
       data-locations: classpath:data.sql
       schema-locations: classpath:schema.sql
-  
+      encoding: UTF-8
+
   # Thymeleaf Configuration
   thymeleaf:
     cache: false

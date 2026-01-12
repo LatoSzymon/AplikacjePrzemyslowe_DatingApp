@@ -141,33 +141,6 @@ public class User {
         return LocalDate.now().getYear() - birthDate.getYear();
     }
 
-    /**
-     * Pomocnicza metoda do dodawania profilu z synchronizacją relacji
-     */
-    public void setProfile(Profile profile) {
-        if (profile == null) {
-            if (this.profile != null) {
-                this.profile.setUser(null);
-            }
-        } else {
-            profile.setUser(this);
-        }
-        this.profile = profile;
-    }
-
-    /**
-     * Pomocnicza metoda do dodawania preferencji z synchronizacją relacji
-     */
-    public void setPreference(Preference preference) {
-        if (preference == null) {
-            if (this.preference != null) {
-                this.preference.setUser(null);
-            }
-        } else {
-            preference.setUser(this);
-        }
-        this.preference = preference;
-    }
 
     // ========== EQUALS & HASHCODE ==========
 

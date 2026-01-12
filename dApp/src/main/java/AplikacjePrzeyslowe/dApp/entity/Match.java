@@ -77,19 +77,22 @@ public class Match {
     // ========== BUSINESS METHODS ==========
 
     /**
-     * Dodaje wiadomość do konwersacji z synchronizacją relacji
+     * Dodaje wiadomość do konwersacji
      */
     public void addMessage(Message message) {
-        messages.add(message);
-        message.setMatch(this);
+        if (message != null) {
+            message.setMatch(this);
+            messages.add(message);
+        }
     }
 
     /**
-     * Usuwa wiadomość z konwersacji z synchronizacją relacji
+     * Usuwa wiadomość z konwersacji
      */
     public void removeMessage(Message message) {
-        messages.remove(message);
-        message.setMatch(null);
+        if (message != null) {
+            messages.remove(message);
+        }
     }
 
     /**
