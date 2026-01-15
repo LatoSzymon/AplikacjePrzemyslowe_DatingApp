@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:11.4
+    container_name: datapp-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MARIADB_DATABASE: ${MYSQL_DATABASE:-dating_app_db}
+      MARIADB_USER: ${MYSQL_USER:-dating_app_user}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD:-dating_app_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - datapp-net
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapp-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/${MYSQL_DATABASE:-dating_app_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-dating_app_user}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-dating_app_password}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8080
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - datapp-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/swagger-ui.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - app_logs:/app/logs
+
+networks:
+  datapp-net:
+    driver: bridge
+
+volumes:
+  db_data:
+  app_logs:
+

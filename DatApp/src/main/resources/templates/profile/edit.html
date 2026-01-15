@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Dating App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{layout :: navbar}"></div>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-pencil"></i> Edit Profile</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Error message -->
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+                        </div>
+
+                        <form th:action="@{/profile/edit}" th:object="${updateRequest}" method="post">
+                            <div class="mb-3">
+                                <label for="bio" class="form-label">Bio</label>
+                                <textarea class="form-control" th:field="*{bio}"
+                                          th:errorclass="is-invalid" id="bio" rows="4"
+                                          placeholder="Tell others about yourself..."></textarea>
+                                <div class="invalid-feedback" th:errors="*{bio}"></div>
+                                <small class="form-text text-muted">Max 1000 characters</small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="occupation" class="form-label">Occupation</label>
+                                    <input type="text" class="form-control" th:field="*{occupation}"
+                                           th:errorclass="is-invalid" id="occupation"
+                                           placeholder="e.g., Software Engineer">
+                                    <div class="invalid-feedback" th:errors="*{occupation}"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="education" class="form-label">Education</label>
+                                    <input type="text" class="form-control" th:field="*{education}"
+                                           th:errorclass="is-invalid" id="education"
+                                           placeholder="e.g., Master's Degree">
+                                    <div class="invalid-feedback" th:errors="*{education}"></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="heightCm" class="form-label">Height (cm)</label>
+                                    <input type="number" class="form-control" th:field="*{heightCm}"
+                                           th:errorclass="is-invalid" id="heightCm"
+                                           min="150" max="250" placeholder="e.g., 175">
+                                    <div class="invalid-feedback" th:errors="*{heightCm}"></div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/profile}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{layout :: footer}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

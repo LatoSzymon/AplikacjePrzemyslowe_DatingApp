@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:tc:mariadb:11.4:///dating_app_db
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: never
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
+
