@@ -65,7 +65,7 @@ tasks.named('test') {
     useJUnitPlatform()
     // Na czas pracy nad testami zostawiamy możliwość generowania raportu JaCoCo mimo błędów.
     // Gdy dojdziemy do zielonego builda, ustawimy to z powrotem na false.
-    ignoreFailures = true
+    ignoreFailures = false
     finalizedBy jacocoTestReport
 }
 

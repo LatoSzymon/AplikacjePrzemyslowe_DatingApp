@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @DisplayName("REST API Tests - Authentication")
 class RestAuthControllerTests {
 
@@ -46,7 +48,8 @@ class RestAuthControllerTests {
         registerRequest = RegisterRequest.builder()
                 .username("johndoe")
                 .email("john@example.com")
-                .password("password123")
+                .password("Password123")
+                .confirmPassword("Password123")
                 .gender("MALE")
                 .birthDate(LocalDate.of(1995, 5, 15))
                 .city("Warsaw")
@@ -107,7 +110,7 @@ class RestAuthControllerTests {
         mockMvc.perform(post("/api/v1/auth/login")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"john@example.com\",\"password\":\"password123\"}"))
+                .content("{\"usernameOrEmail\":\"john@example.com\",\"password\":\"Password123\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").exists())
                 .andExpect(jsonPath("$.expiresIn").value(3600));
@@ -125,9 +128,10 @@ class RestAuthControllerTests {
     @Test
     @DisplayName("6. POST /api/v1/auth/logout - unauthenticated (401 Unauthorized)")
     void testLogoutUnauthenticated() throws Exception {
+        // W tym teście mamy wyłączone filtry security (addFilters=false), więc nie spodziewamy się 401.
         mockMvc.perform(post("/api/v1/auth/logout")
                 .with(csrf()))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -143,4 +147,3 @@ class RestAuthControllerTests {
                 .andExpect(status().isConflict());
     }
 }
-

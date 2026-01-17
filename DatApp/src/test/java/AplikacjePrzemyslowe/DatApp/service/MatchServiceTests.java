@@ -1,4 +1,4 @@
-package AplikacjePrzemyslowe.DatApp;
+package AplikacjePrzemyslowe.DatApp.service;
 
 import AplikacjePrzemyslowe.DatApp.dto.response.MatchResponse;
 import AplikacjePrzemyslowe.DatApp.entity.Match;
@@ -9,7 +9,6 @@ import AplikacjePrzemyslowe.DatApp.exception.UnauthorizedException;
 import AplikacjePrzemyslowe.DatApp.repository.MatchRepository;
 import AplikacjePrzemyslowe.DatApp.repository.MessageRepository;
 import AplikacjePrzemyslowe.DatApp.repository.UserRepository;
-import AplikacjePrzemyslowe.DatApp.service.MatchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

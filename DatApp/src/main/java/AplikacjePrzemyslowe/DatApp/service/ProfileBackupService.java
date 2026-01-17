@@ -76,14 +76,6 @@ public class ProfileBackupService {
         }
     }
 
-    /**
-     * Eksportuje profil użytkownika do formatu XML.
-     *
-     * @param userId ID użytkownika
-     * @return Backup jako byte array w formacie XML
-     * @throws ResourceNotFoundException gdy użytkownik nie istnieje
-     * @throws BackupException gdy eksport nie powiedzie się
-     */
     @Transactional(readOnly = true)
     public byte[] exportProfileToXml(Long userId) {
         log.info("Exporting profile to XML for user {}", userId);
