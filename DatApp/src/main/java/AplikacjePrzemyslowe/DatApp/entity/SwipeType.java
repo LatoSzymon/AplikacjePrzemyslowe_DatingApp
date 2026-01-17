@@ -6,6 +6,6 @@ package AplikacjePrzemyslowe.DatApp.entity;
 public enum SwipeType {
     LIKE,        // Polubienie
     DISLIKE,     // Odrzucenie
-    SUPER_LIKE   // Super polubienie (opcjonalne, premium feature)
+    PASS, SUPER_LIKE   // Super polubienie (opcjonalne, premium feature)
 }
 

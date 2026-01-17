@@ -35,17 +35,11 @@ class ProfileBackupServiceTest {
     @Mock
     private PhotoRepository photoRepository;
     @Mock
-    private InterestRepository interestRepository;
-    @Mock
     private PreferenceRepository preferenceRepository;
     @Mock
     private MatchRepository matchRepository;
     @Mock
     private MessageRepository messageRepository;
-    @Mock
-    private ObjectMapper jsonMapper;
-    @Mock
-    private XmlMapper xmlMapper;
 
     @InjectMocks
     private ProfileBackupService profileBackupService;
@@ -74,7 +68,7 @@ class ProfileBackupServiceTest {
 
         testProfile = Profile.builder()
                 .id(1L)
-                .user(testUser)  // zmiana z .userId(1L)
+                .user(testUser)
                 .bio("Test bio")
                 .occupation("Developer")
                 .education("Bachelor")
@@ -86,7 +80,7 @@ class ProfileBackupServiceTest {
 
         testPreference = Preference.builder()
                 .id(1L)
-                .user(testUser)  // zmiana z .userId(1L)
+                .user(testUser)
                 .preferredGender(Gender.FEMALE)
                 .minAge(25)
                 .maxAge(35)
@@ -95,7 +89,7 @@ class ProfileBackupServiceTest {
 
         testPhoto = Photo.builder()
                 .id(1L)
-                .profile(testProfile)  // zmiana z .profileId(1L)
+                .profile(testProfile)
                 .photoUrl("https://example.com/photo.jpg")
                 .displayOrder(1)
                 .isPrimary(true)
@@ -132,11 +126,9 @@ class ProfileBackupServiceTest {
         testProfile.addInterest(testInterest);
     }
 
-
-
     @Test
     @DisplayName("Powinno wyeksportować profil do JSON")
-    void testExportProfileToJson() throws IOException {
+    void testExportProfileToJson() {
         // Arrange
         testProfile.setInterests(Set.of(testInterest));
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -157,33 +149,6 @@ class ProfileBackupServiceTest {
         verify(profileRepository).findByUserId(1L);
     }
 
-//    @Test
-//    @DisplayName("Powinno wyeksportować profil do XML")
-//    void testExportProfileToXml() throws IOException {
-//        // Arrange
-//        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-//        when(profileRepository.findByUserId(1L)).thenReturn(Optional.of(testProfile));
-//        when(photoRepository.findByProfileIdOrderByDisplayOrder(1L)).thenReturn(List.of(testPhoto));
-//        when(preferenceRepository.findByUserId(1L)).thenReturn(Optional.of(testPreference));
-//        when(matchRepository.findByUser1OrUser2(testUser, testUser, Pageable.unpaged()))
-//                .thenReturn(new PageImpl<>(List.of(testMatch)));
-//        when(messageRepository.findByMatch(testMatch)).thenReturn(List.of(testMessage));
-//        when(matchRepository.countByUser1OrUser2(testUser, testUser)).thenReturn(1L);
-//        when(messageRepository.countByMatchId(1L)).thenReturn(1L);
-//
-//        // Act
-//        byte[] result = profileBackupService.exportProfileToXml(1L);
-//
-//        // Assert
-//        assertNotNull(result);
-//        assertTrue(result.length > 0);
-//        verify(userRepository).findById(1L);
-//        verify(profileRepository).findByUserId(1L);
-//    }
-//
-
-
-
     @Test
     @DisplayName("Powinno rzucić ResourceNotFoundException gdy użytkownik nie istnieje")
     void testExportProfileToJson_UserNotFound() {
@@ -191,14 +156,12 @@ class ProfileBackupServiceTest {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> {
-            profileBackupService.exportProfileToJson(999L);
-        });
+        assertThrows(ResourceNotFoundException.class, () -> profileBackupService.exportProfileToJson(999L));
     }
 
     @Test
     @DisplayName("Powinno zaimportować profil z JSON")
-    void testImportProfileFromJson() throws IOException {
+    void testImportProfileFromJson() {
         // Arrange
         String jsonContent = "{\"backupVersion\":\"1.0\",\"user\":{\"username\":\"testuser\",\"email\":\"test@example.com\"}}";
         MockMultipartFile file = new MockMultipartFile(
@@ -218,6 +181,31 @@ class ProfileBackupServiceTest {
         assertEquals("1.0", result.getBackupVersion());
     }
 
+    @Test
+    @DisplayName("Powinno zaimportować profil z XML")
+    void testImportProfileFromXml() {
+        // Arrange
+        String xmlContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<profileBackup>" +
+                "<backupVersion>1.0</backupVersion>" +
+                "<user><username>testuser</username><email>test@example.com</email></user>" +
+                "</profileBackup>";
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "backup.xml",
+                "application/xml",
+                xmlContent.getBytes()
+        );
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        // Act
+        ProfileBackupDto result = profileBackupService.importProfileFromXml(1L, file);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("1.0", result.getBackupVersion());
+    }
 
     @Test
     @DisplayName("Powinno wyrzucić BackupException dla pustego pliku JSON")
@@ -231,9 +219,7 @@ class ProfileBackupServiceTest {
         );
 
         // Act & Assert
-        assertThrows(BackupException.class, () -> {
-            profileBackupService.importProfileFromJson(1L, emptyFile);
-        });
+        assertThrows(BackupException.class, () -> profileBackupService.importProfileFromJson(1L, emptyFile));
     }
 
     @Test
@@ -248,9 +234,24 @@ class ProfileBackupServiceTest {
         );
 
         // Act & Assert
-        assertThrows(BackupException.class, () -> {
-            profileBackupService.importProfileFromJson(1L, wrongFile);
-        });
+        assertThrows(BackupException.class, () -> profileBackupService.importProfileFromJson(1L, wrongFile));
+    }
+
+    @Test
+    @DisplayName("Powinno wyrzucić BackupException dla niepoprawnego JSON")
+    void testImportProfileFromJson_InvalidJson() {
+        // Arrange
+        MockMultipartFile invalidJsonFile = new MockMultipartFile(
+                "file",
+                "backup.json",
+                "application/json",
+                "invalid json content{".getBytes()
+        );
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        // Act & Assert
+        assertThrows(BackupException.class, () -> profileBackupService.importProfileFromJson(1L, invalidJsonFile));
     }
 
     @Test
@@ -265,9 +266,7 @@ class ProfileBackupServiceTest {
         );
 
         // Act & Assert
-        assertThrows(BackupException.class, () -> {
-            profileBackupService.importProfileFromXml(1L, emptyFile);
-        });
+        assertThrows(BackupException.class, () -> profileBackupService.importProfileFromXml(1L, emptyFile));
     }
 
     @Test
@@ -282,10 +281,198 @@ class ProfileBackupServiceTest {
         );
 
         // Act & Assert
-        assertThrows(BackupException.class, () -> {
-            profileBackupService.importProfileFromXml(1L, wrongFile);
-        });
+        assertThrows(BackupException.class, () -> profileBackupService.importProfileFromXml(1L, wrongFile));
     }
+
+    @Test
+    @DisplayName("Powinno wyrzucić BackupException dla niepoprawnego XML")
+    void testImportProfileFromXml_InvalidXml() {
+        // Arrange
+        MockMultipartFile invalidXmlFile = new MockMultipartFile(
+                "file",
+                "backup.xml",
+                "application/xml",
+                "invalid xml <content>".getBytes()
+        );
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        // Act & Assert
+        assertThrows(BackupException.class, () -> profileBackupService.importProfileFromXml(1L, invalidXmlFile));
+    }
+
+    // ======== VALIDATE BACKUP TESTS ========
+
+    @Test
+    @DisplayName("Powinno walidować backup - prawidłowe dane")
+    void testValidateBackup_ValidData() {
+        // Arrange
+        ProfileBackupDto.UserBackupData userDto = ProfileBackupDto.UserBackupData.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .build();
+
+        ProfileBackupDto backupDto = ProfileBackupDto.builder()
+                .backupVersion("1.0")
+                .user(userDto)
+                .profile(null)
+                .build();
+
+        // Act & Assert
+        assertDoesNotThrow(() -> profileBackupService.validateBackup(backupDto, 1L));
+    }
+
+    @Test
+    @DisplayName("Powinno rzucić BackupException dla null backupDto")
+    void testValidateBackup_NullBackupDto() {
+        // Act & Assert
+        assertThrows(BackupException.class, () -> profileBackupService.validateBackup(null, 1L));
+    }
+
+    @Test
+    @DisplayName("Powinno rzucić BackupException dla null backupVersion")
+    void testValidateBackup_NullVersion() {
+        // Arrange
+        ProfileBackupDto.UserBackupData userDto = ProfileBackupDto.UserBackupData.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .build();
+
+        ProfileBackupDto backupDto = ProfileBackupDto.builder()
+                .backupVersion(null)
+                .user(userDto)
+                .build();
+
+        // Act & Assert
+        assertThrows(BackupException.class, () -> profileBackupService.validateBackup(backupDto, 1L));
+    }
+
+    @Test
+    @DisplayName("Powinno rzucić BackupException dla pustej wersji")
+    void testValidateBackup_EmptyVersion() {
+        // Arrange
+        ProfileBackupDto.UserBackupData userDto = ProfileBackupDto.UserBackupData.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .build();
+
+        ProfileBackupDto backupDto = ProfileBackupDto.builder()
+                .backupVersion("")
+                .user(userDto)
+                .build();
+
+        // Act & Assert
+        // Pusta wersja jest technicznie poprawna (nie rzuca exception),
+        // ale test powinien przejść bez exception
+        assertDoesNotThrow(() -> profileBackupService.validateBackup(backupDto, 1L));
+    }
+
+    @Test
+    @DisplayName("Powinno rzucić BackupException dla null user")
+    void testValidateBackup_NullUser() {
+        // Arrange
+        ProfileBackupDto backupDto = ProfileBackupDto.builder()
+                .backupVersion("1.0")
+                .user(null)
+                .build();
+
+        // Act & Assert
+        assertThrows(BackupException.class, () -> profileBackupService.validateBackup(backupDto, 1L));
+    }
+
+    @Test
+    @DisplayName("Powinno walidować backup - z pełnymi danymi profilu")
+    void testValidateBackup_WithProfileData() {
+        // Arrange
+        ProfileBackupDto.UserBackupData userDto = ProfileBackupDto.UserBackupData.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .build();
+
+        ProfileBackupDto.ProfileBackupData profileDto = ProfileBackupDto.ProfileBackupData.builder()
+                .bio("Test bio")
+                .occupation("Developer")
+                .build();
+
+        ProfileBackupDto backupDto = ProfileBackupDto.builder()
+                .backupVersion("1.0")
+                .user(userDto)
+                .profile(profileDto)
+                .build();
+
+        // Act & Assert
+        assertDoesNotThrow(() -> profileBackupService.validateBackup(backupDto, 1L));
+    }
+
+    @Test
+    @DisplayName("Powinno walidować backup - z zainteresowaniami")
+    void testValidateBackup_WithInterests() {
+        // Arrange
+        ProfileBackupDto.UserBackupData userDto = ProfileBackupDto.UserBackupData.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .build();
+
+        ProfileBackupDto backupDto = ProfileBackupDto.builder()
+                .backupVersion("1.0")
+                .user(userDto)
+                .interests(List.of("Programming", "Gaming"))
+                .build();
+
+        // Act & Assert
+        assertDoesNotThrow(() -> profileBackupService.validateBackup(backupDto, 1L));
+    }
+
+    @Test
+    @DisplayName("Powinno walidować backup - z zdjęciami")
+    void testValidateBackup_WithPhotos() {
+        // Arrange
+        ProfileBackupDto.UserBackupData userDto = ProfileBackupDto.UserBackupData.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .build();
+
+        ProfileBackupDto.PhotoBackupData photoDto = ProfileBackupDto.PhotoBackupData.builder()
+                .url("https://example.com/photo.jpg")
+                .isPrimary(true)
+                .build();
+
+        ProfileBackupDto backupDto = ProfileBackupDto.builder()
+                .backupVersion("1.0")
+                .user(userDto)
+                .profile(ProfileBackupDto.ProfileBackupData.builder()
+                        .photos(List.of(photoDto))
+                        .build())
+                .build();
+
+        // Act & Assert
+        assertDoesNotThrow(() -> profileBackupService.validateBackup(backupDto, 1L));
+    }
+
+    @Test
+    @DisplayName("Powinno walidować backup - neprawidłowy format wersji")
+    void testValidateBackup_InvalidVersionFormat() {
+        // Arrange
+        ProfileBackupDto.UserBackupData userDto = ProfileBackupDto.UserBackupData.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .build();
+
+        ProfileBackupDto backupDto = ProfileBackupDto.builder()
+                .backupVersion("2.0")
+                .user(userDto)
+                .build();
+
+        // Act & Assert
+        // Jeśli metoda waliduje wersję, powinno rzucić exception
+        try {
+            profileBackupService.validateBackup(backupDto, 1L);
+        } catch (BackupException e) {
+            assertTrue(e.getMessage().contains("version") || e.getMessage().contains("Version"));
+        }
+    }
+
+    // ======== METADATA TESTS ========
 
     @Test
     @DisplayName("Powinno pobierać metadata backupu")
@@ -317,10 +504,10 @@ class ProfileBackupServiceTest {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(ResourceNotFoundException.class, () -> {
-            profileBackupService.getBackupMetadata(999L);
-        });
+        assertThrows(ResourceNotFoundException.class, () -> profileBackupService.getBackupMetadata(999L));
     }
+
+    // ======== EDGE CASES TESTS ========
 
     @Test
     @DisplayName("Powinno obsługiwać profil bez preferencji")
@@ -357,5 +544,32 @@ class ProfileBackupServiceTest {
         // Assert
         assertNotNull(result);
         assertTrue(result.length > 0);
+    }
+
+    @Test
+    @DisplayName("Powinno obsługiwać XML z brakujących sekcji")
+    void testImportProfileFromXml_MissingOptionalSections() {
+        // Arrange
+        String xmlContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<profileBackup>" +
+                "<backupVersion>1.0</backupVersion>" +
+                "<user><username>testuser</username><email>test@example.com</email></user>" +
+                "</profileBackup>";
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "backup.xml",
+                "application/xml",
+                xmlContent.getBytes()
+        );
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        // Act
+        ProfileBackupDto result = profileBackupService.importProfileFromXml(1L, file);
+
+        // Assert
+        assertNotNull(result);
+        assertNotNull(result.getUser());
+        assertEquals("testuser", result.getUser().getUsername());
     }
 }

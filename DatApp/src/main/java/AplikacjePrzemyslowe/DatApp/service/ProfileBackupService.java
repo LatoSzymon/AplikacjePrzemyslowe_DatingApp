@@ -314,7 +314,7 @@ public class ProfileBackupService {
      * @param userId ID użytkownika
      * @throws BackupException gdy backup jest nieprawidłowy
      */
-    private void validateBackup(ProfileBackupDto backup, Long userId) {
+    void validateBackup(ProfileBackupDto backup, Long userId) {
         log.debug("Validating backup for user {}", userId);
 
         if (backup == null) {
