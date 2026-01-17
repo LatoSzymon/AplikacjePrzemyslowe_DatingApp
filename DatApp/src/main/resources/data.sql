@@ -178,22 +178,16 @@ INSERT INTO matches (match_id, user1_id, user2_id, is_active, matched_at) VALUES
 -- ============================================
 -- MESSAGES - Wiadomości w konwersacjach
 -- ============================================
-INSERT INTO messages (message_id, match_id, sender_id, content, is_read, sent_at, read_at) VALUES
--- Match 1: Alice (1) x Bob (2)
-(1, 1, 1, 'Cześć! Jak się masz? 😊', TRUE, NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 1 DAY + INTERVAL 5 MINUTE),
-(2, 1, 2, 'Cześć Alice! Wszystko super! Jak się masz ty?', TRUE, NOW() - INTERVAL 2 DAY + INTERVAL 30 MINUTE, NOW() - INTERVAL 1 DAY + INTERVAL 10 MINUTE),
-(3, 1, 1, 'Super! Czy chciałbyś się kiedyś spotkać? 🎬', TRUE, NOW() - INTERVAL 1 DAY + INTERVAL 2 HOUR, NOW() - INTERVAL 1 DAY + INTERVAL 1 HOUR),
-
--- Match 2: Bob (2) x Diana (4)
-(4, 2, 2, 'Hej Diana! Widziałem, że mamy wspólne zainteresowania!', TRUE, NOW() - INTERVAL 1 DAY, NOW() - INTERVAL 12 HOUR),
-(5, 2, 4, 'Bob! Tak, to fajne! Lubisz też gotowanie?', TRUE, NOW() - INTERVAL 1 DAY + INTERVAL 1 HOUR, NOW() - INTERVAL 12 HOUR),
-
--- Match 3: Evan (5) x Alice (1)
-(6, 3, 5, 'Cześć Alice! 👋', FALSE, NOW() - INTERVAL 5 MINUTE, NULL),
-
--- Match 5: Hannah (8) x Evan (5)
-(7, 5, 8, 'Evan! Chętnie bym się z Tobą spotkała! 😊', TRUE, NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 1 DAY),
-(8, 5, 5, 'Hannah, ja też! Może w ten weekend? ☕', TRUE, NOW() - INTERVAL 2 DAY + INTERVAL 30 MINUTE, NOW() - INTERVAL 1 DAY);
+INSERT INTO messages (message_id, match_id, sender_id, receiver_id, content, is_read, sent_at, read_at)
+VALUES
+    (1, 1, 1, 2, 'Cześć! Jak się masz? 😊', TRUE, NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 1 DAY + INTERVAL 5 MINUTE),
+    (2, 1, 2, 1, 'Cześć Alice! Wszystko super! Jak się masz ty?', TRUE, NOW() - INTERVAL 2 DAY + INTERVAL 30 MINUTE, NOW() - INTERVAL 1 DAY + INTERVAL 10 MINUTE),
+    (3, 1, 1, 2, 'Super! Czy chciałbyś się kiedyś spotkać? 🎬', TRUE, NOW() - INTERVAL 1 DAY + INTERVAL 2 HOUR, NOW() - INTERVAL 1 DAY + INTERVAL 1 HOUR),
+    (4, 2, 2, 4, 'Hej Diana! Widziałem, że mamy wspólne zainteresowania!', TRUE, NOW() - INTERVAL 1 DAY, NOW() - INTERVAL 12 HOUR),
+    (5, 2, 4, 2, 'Bob! Tak, to fajne! Lubisz też gotowanie?', TRUE, NOW() - INTERVAL 1 DAY + INTERVAL 1 HOUR, NOW() - INTERVAL 12 HOUR),
+    (6, 3, 5, 1, 'Cześć Alice! 👋', FALSE, NOW() - INTERVAL 5 MINUTE, NULL),
+    (7, 5, 8, 5, 'Evan! Chętnie bym się z Tobą spotkała! 😊', TRUE, NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 1 DAY),
+    (8, 5, 5, 8, 'Hannah, ja też! Może w ten weekend? ☕', TRUE, NOW() - INTERVAL 2 DAY + INTERVAL 30 MINUTE, NOW() - INTERVAL 1 DAY);
 
 -- ============================================
 -- PROFILE_BACKUPS - Kopie zapasowe (opcjonalnie, puste dane)

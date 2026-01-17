@@ -48,8 +48,8 @@ CREATE TABLE profiles (
     height_cm INT COMMENT 'Wzrost w centimetrach',
     occupation VARCHAR(100),
     education VARCHAR(100),
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8),
+    latitude DOUBLE,
+    longitude DOUBLE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

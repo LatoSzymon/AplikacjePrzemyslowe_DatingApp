@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.2'
 
-    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    runtimeOnly 'com.mysql:mysql-connector-j:8.0.33'
 
     // --- LOMBOK ---
     compileOnly 'org.projectlombok:lombok'
@@ -63,9 +63,7 @@ bootJar {
 
 tasks.named('test') {
     useJUnitPlatform()
-    // Na czas pracy nad testami zostawiamy możliwość generowania raportu JaCoCo mimo błędów.
-    // Gdy dojdziemy do zielonego builda, ustawimy to z powrotem na false.
-    ignoreFailures = false
+//  ignoreFailures = false
     finalizedBy jacocoTestReport
 }
 
